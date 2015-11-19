@@ -5,7 +5,7 @@
         .module('qorDash.orchestrate')
         .controller('OrchestrateDomainController', orchestrateDomainController);
 
-    function orchestrateDomainController($scope, resolvedDomain) {
+    function orchestrateDomainController(resolvedDomain) {
         var vm = this;
         vm.domain = resolvedDomain;
     }

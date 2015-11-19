@@ -22,7 +22,8 @@
                 views: {
                     'main@': {
                         templateUrl: 'app/modules/orchestrate/orchestrate.html',
-                        controller: 'OrchestrateController'
+                        controller: 'OrchestrateController',
+                        controllerAs: 'vm'
                     }
                 }
             });

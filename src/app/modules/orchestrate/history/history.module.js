@@ -11,6 +11,7 @@
                 url: '/:opt',
                 templateUrl: 'app/modules/orchestrate/history/history.html',
                 controller: 'OrchestrateHistoryController',
+                controllerAs: 'vm',
                 resolve: {
                     resolvedHistory: function($stateParams, orchestrateService) {
                         return orchestrateService.loadHistory($stateParams.id, $stateParams.inst, $stateParams.opt);

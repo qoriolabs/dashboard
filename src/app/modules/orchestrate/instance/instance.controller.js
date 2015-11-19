@@ -5,8 +5,10 @@
         .module('qorDash.orchestrate')
         .controller('OrchestrateInstanceController', orchestrateInstanceController);
 
-    function orchestrateInstanceController($scope, $stateParams, resolvedInstances) {
-        $scope.title = $stateParams.inst;
-        $scope.workflows = resolvedInstances;
+    function orchestrateInstanceController($stateParams, resolvedInstances) {
+        var vm = this;
+
+        vm.title = $stateParams.inst;
+        vm.workflows = resolvedInstances;
     }
 })();

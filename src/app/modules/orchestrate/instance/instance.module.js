@@ -11,6 +11,7 @@
                 url: '/:inst',
                 templateUrl: 'app/modules/orchestrate/instance/instance.html',
                 controller: 'OrchestrateInstanceController',
+                controllerAs: 'vm',
                 resolve: {
                     resolvedInstances: function($stateParams, orchestrateService) {
                         return orchestrateService.loadInstances($stateParams.id, $stateParams.inst);

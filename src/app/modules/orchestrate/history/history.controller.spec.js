@@ -23,14 +23,14 @@ describe('Controller: OrchestrateHistoryController', function() {
                 inst: 'inst',
                 opt: 'opt'
             };
-            _$controller_('OrchestrateHistoryController', {$scope: $scope, $stateParams: $stateParams, resolvedHistory: resolvedHistory});
+            _$controller_('OrchestrateHistoryController as vm', {$scope: $scope, $stateParams: $stateParams, resolvedHistory: resolvedHistory});
         })
     });
 
     describe('after loading', function(){
         describe('after successful loading', function(){
-            it ('should populate $scope.previousCalls with response.data', function() {
-                expect($scope.previousCalls).toEqual(previousCalls);
+            it ('should populate $scope.previousCalls with resolvedHistory', function() {
+                expect($scope.vm.previousCalls).toEqual(resolvedHistory);
             });
         });
     });

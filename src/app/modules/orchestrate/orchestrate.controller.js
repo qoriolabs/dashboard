@@ -1,17 +1,21 @@
 (function () {
     'use strict';
+
     angular
         .module('qorDash.orchestrate')
         .controller('OrchestrateController', orchestrateController);
 
-    function orchestrateController($scope, $state, $stateParams, resolvedDomains) {
-        $scope.domains = resolvedDomains;
+    function orchestrateController($state, $stateParams, resolvedDomains) {
+        var vm = this;
 
-        if($scope.domains.length === 1 && $state.current.name == 'app.orchestrate'){
-            $state.go('app.orchestrate.domain', {id:$scope.domains[0].id})
+        vm.domains = resolvedDomains;
+
+        // Go to the next state if we have only one domain
+        if(vm.domains.length === 1 && $state.current.name == 'app.orchestrate'){
+            $state.go('app.orchestrate.domain', {id:vm.domains[0].id})
         }
 
-        $scope.domain = $scope.domains.filter(function (domain) {
+        vm.domain = vm.domains.filter(function (domain) {
             return domain.id == $stateParams.id;
         })[0];
     }

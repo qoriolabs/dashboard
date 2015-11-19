@@ -5,7 +5,8 @@
         .module('qorDash.orchestrate')
         .controller('OrchestrateHistoryController', orchestrateHistoryController);
 
-    function orchestrateHistoryController($scope, resolvedHistory) {
-        $scope.previousCalls = resolvedHistory;
+    function orchestrateHistoryController(resolvedHistory) {
+        var vm = this;
+        vm.previousCalls = resolvedHistory;
     }
 })();
