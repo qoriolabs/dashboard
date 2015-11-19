@@ -14,9 +14,13 @@ describe('Controller: OrchestrateOptionController', function() {
         deferred;
 
     beforeEach(function() {
+        module('ui.router');
         module('qorDash.core');
         module('qorDash.auth');
         module('qorDash.orchestrate');
+        module(function($provide) {
+            $provide.constant('AUTH_API_URL', 'api url');
+        });
     });
 
     beforeEach(function() {
@@ -44,7 +48,7 @@ describe('Controller: OrchestrateOptionController', function() {
     });
 
     beforeEach(function () {
-        inject(function(_$rootScope_, _$controller_, _dataLoader_, _user_, $q, $state, $stateParams)  {
+        inject(function(_$rootScope_, _$controller_, _user_, $q, $state, $stateParams)  {
             q = $q;
             rootScope = _$rootScope_;
             $scope = _$rootScope_.$new();
@@ -52,12 +56,13 @@ describe('Controller: OrchestrateOptionController', function() {
             stateParams = $stateParams;
             stateParams.id = id;
             stateParams.inst = inst;
+            stateParams.opt = opt;
             stateParams.opt_id = opt_id;
             stateParams.instance = inst;
 
             spyOn(state, 'go').and.returnValue(true);
             _$controller_('OrchestrateOptionController as vm',
-                {$scope: $scope, errorHandler: errorHandler, orchestrateService: orchestrateService, WS_URL : WS_URL});
+                {$scope: $scope, $stateParams: $stateParams, errorHandler: errorHandler, orchestrateService: orchestrateService, WS_URL : WS_URL});
         })
     });
 
