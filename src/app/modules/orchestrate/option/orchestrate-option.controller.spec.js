@@ -11,6 +11,7 @@ describe('Controller: OrchestrateOptionController', function() {
         opt = 'opt',
         opt_id = 'opt_id',
         logWsUrl = 'logWsUrl',
+        resolvedInstances=[{1:2}],
         deferred;
 
     beforeEach(function() {
@@ -62,7 +63,7 @@ describe('Controller: OrchestrateOptionController', function() {
 
             spyOn(state, 'go').and.returnValue(true);
             _$controller_('OrchestrateOptionController as vm',
-                {$scope: $scope, $stateParams: $stateParams, errorHandler: errorHandler, orchestrateService: orchestrateService, WS_URL : WS_URL});
+                {$scope: $scope, $stateParams: $stateParams, errorHandler: errorHandler, orchestrateService: orchestrateService, WS_URL : WS_URL, resolvedInstances: resolvedInstances});
         })
     });
 
@@ -74,9 +75,7 @@ describe('Controller: OrchestrateOptionController', function() {
                 };
                 $scope.vm.sendMessage();
                 deferred.resolve({
-                    data: {
-                        log_ws_url: logWsUrl
-                    }
+                    log_ws_url: logWsUrl
                 });
                 $scope.$digest();
             });

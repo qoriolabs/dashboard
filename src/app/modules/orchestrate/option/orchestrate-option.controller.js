@@ -4,7 +4,7 @@
     angular.module('qorDash.orchestrate')
         .controller('OrchestrateOptionController', orchestrateOptionController);
 
-    function orchestrateOptionController($scope, $stateParams, orchestrateService, $timeout, WS_URL, errorHandler) {
+    function orchestrateOptionController($scope, $stateParams, orchestrateService, $timeout, WS_URL, resolvedInstances) {
         var vm = this;
 
         vm.sendMessage = sendMessage;
@@ -26,43 +26,35 @@
         function loadOption() {
             vm.formElements = {};
 
-            if (optId == 'new') {
-                if (!$scope.$parent.$parent.vm.workflows || $scope.$parent.$parent.vm.workflows.length === 0) {
-                    $scope.$watch('$parent.$parent.vm.workflows', function() {
-                        if ($scope.$parent.$parent.vm.workflows) {
-                            loadFormElementsFromWorkflow();
-                        }
-                    });
-                } else {
+            if (optId === 'new') {
+                if (resolvedInstances || resolvedInstances !== 0) {
                     loadFormElementsFromWorkflow();
                 }
-
             } else {
                 orchestrateService.loadOption(domain, instance, opt, optId).then(
-                    function (response) {
-                        vm.workflow = response.data;
+                    function (data) {
+                        vm.workflow = data;
                         for (var index in vm.workflow.context) {
                             vm.formElements[index] = vm.workflow.context[index];
                         }
-                    },
-                    function (response) {
-                        vm.error = errorHandler.showError(response);
                     });
             }
         }
 
         function loadFormElementsFromWorkflow() {
-            vm.workflow = $scope.$parent.$parent.vm.workflows.filter(function (workflow) {
+            vm.workflow = resolvedInstances.filter(function (workflow) {
                 return workflow.name == $stateParams.opt;
             })[0];
 
             if (!vm.workflow) {
                 return;
             }
+
             var objToAdd = {};
             for (var index in vm.workflow.default_input) {
                 objToAdd[index] = vm.workflow.default_input[index];
             }
+
             $timeout(function() {
                 $scope.$apply(function () {
                     vm.formElements = objToAdd;
@@ -79,9 +71,10 @@
                 for (var index in vm.workflow.default_input) {
                     data[index] = vm.formElements[index]
                 }
+
                 orchestrateService.loadLogUrl(vm.workflow.activate_url, data).then(
-                    function (response) {
-                        vm.timeLineUrl = WS_URL + response.data.log_ws_url;
+                    function (data) {
+                        vm.timeLineUrl = WS_URL + data.log_ws_url;
                         vm.sendMessageButtonLoadingState = false;
                     }
                 );
