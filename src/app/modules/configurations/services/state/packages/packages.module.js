@@ -11,6 +11,7 @@
                 url: '/packages',
                 templateUrl: 'app/modules/configurations/services/state/packages/packages.html',
                 controller: 'PackagesController',
+                controllerAs: 'vm',
                 resolve: {
                     resolvedPackage: function($stateParams, configurationService) {
                         return configurationService.loadPackage($stateParams.domain);

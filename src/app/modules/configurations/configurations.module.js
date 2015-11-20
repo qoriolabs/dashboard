@@ -11,7 +11,7 @@
             'qorDash.configurations.services.state.instances',
             'qorDash.configurations.services.state.instances.editor',
             'qorDash.configurations.services.state.packages',
-            'qorDash.configurations.services.state.packages.editor',
+            'qorDash.configurations.services.state.packages.editor'
         ])
         .config(config);
 
@@ -27,7 +27,8 @@
                 views: {
                     'main@': {
                         templateUrl: 'app/modules/configurations/configurations.html',
-                        controller: 'ConfigurationsController'
+                        controller: 'ConfigurationsController',
+                        controllerAs: 'vm'
                     }
                 }
             });

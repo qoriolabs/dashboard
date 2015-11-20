@@ -16,7 +16,8 @@
             .state('app.configurations.services.state.packages.editor', {
                 url: '/:instances',
                 templateUrl: 'app/modules/configurations/services/state/packages/editor/editor.html',
-                controller: 'PackagesEditorController'
+                controller: 'PackagesEditorController',
+                controllerAs: 'vm'
             })
     }
 })();

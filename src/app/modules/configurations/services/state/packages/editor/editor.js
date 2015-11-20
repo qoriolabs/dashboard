@@ -1,7 +1,9 @@
 (function () {
     'use strict';
 
-    angular.module('qorDash.configurations.services.state.packages.editor')
+    angular
+        .module('qorDash.configurations.services.state.packages.editor')
+        .controller('PackagesEditorController', packagesEditorController)
         .config(function(NotificationProvider) {
             NotificationProvider.setOptions({
                 delay: 5000,
@@ -10,213 +12,176 @@
             });
         });
 
-    packagesEditorController.$inject = ['$scope', '$stateParams', 'API_HOST', '$http', '$modal', 'Notification'];
-    function packagesEditorController($scope, $stateParams, API_HOST, $http, $modal, Notification) {
 
-        $scope.selectedVersion = {};
+   function packagesEditorController($scope, $state, API_HOST, $http, Notification, $modal, resolvedDomains, resolvedPackage) {
+        var vm = this;
 
-        $scope.itemsForSave = {};
-        $scope.newItemsCount = 0;
+        vm.selectedVersion = {};
+        vm.itemsForSave = {};
+        vm.newItemsCount = 0;
+        vm.values = {};
+        vm.requestsCounter = 0;
+        vm.versions = {};
+        vm.liveVersion = {};
 
-        $scope.values = {};
+        vm.domain = resolvedDomains.filter(function (domain) {
+            return domain.id == $state.params.domain;
+        })[0];
 
-        $scope.requestsCounter = 0;
+        vm.editorService = resolvedPackage[$state.params.service];
 
-        $scope.versions = {};
-        $scope.liveVersion = {};
+        vm.editorService.instances = $state.params.instances.split(',');
 
-        $scope.$watch('domains', function() {
-            if (!$scope.domains) {
-                return;
-            }
-            $scope.domain = $scope.domains.filter(function (domain) {
-                return domain.id == $stateParams.domain;
-            })[0];
+        vm.editorService.instances.forEach(function (instance) {
+            vm.selectedVersion[instance] = vm.editorService.versions[0];
         });
 
-        Object.filter = function( obj, predicate) {
-            var key;
+        // Versions that doesn't exist
+        vm.deletedVersions = {};
 
-            for (key in obj) {
-                if (obj.hasOwnProperty(key) && predicate(key)) {
-                    return obj[key];
-                }
-            }
-        };
+        vm.isVersionDeleted = isVersionDeleted;
+        vm.changeSelected = changeSelected;
+        vm.loadData = loadData;
+        vm.changeSelectedVersion = changeSelectedVersion;
+        vm.isLive = isLive;
+        vm.makeLive = makeLive;
+        vm.isSavable = isSavable;
+        vm.makeCopy = makeCopy;
+        vm.save = save;
+        vm.updateValues = updateValues;
 
-        $scope.$watch('service', function() {
-            if (!$scope.service) {
-                return;
-            }
+        vm.loadData();
 
-            $scope.editorService = $scope.service;
-
-            $scope.editorService.instances = $stateParams.instances.split(',');
-
-            $scope.editorService.instances.forEach(function (instance) {
-                $scope.selectedVersion[instance] = $scope.editorService.versions[0];
-            });
-
-            // Versions that doesn't exist
-            $scope.deletedVersions = {};
-
-            $scope.isVersionDeleted = function(instance, version) {
-                if (!$scope.deletedVersions[instance]) {
-                    return false;
-                } else {
-                    for (var i in $scope.deletedVersions[instance]) {
-                        if ($scope.deletedVersions[instance][i] == version) {
-                            return true;
-                        }
-                    }
-                }
+        function isVersionDeleted(instance, version) {
+            if (!vm.deletedVersions[instance]) {
                 return false;
-            };
-
-            $scope.changeSelected = function (instance, version) {
-                if ($scope.isVersionDeleted(instance, $scope.selectedVersion[instance])) {
-                    for (var i in $scope.editorService.versions) {
-                        if (!$scope.isVersionDeleted(instance, $scope.editorService.versions[i])) {
-                            $scope.selectedVersion[instance] = $scope.editorService.versions[i];
-                        }
+            } else {
+                for (var i in vm.deletedVersions[instance]) {
+                    if (vm.deletedVersions[instance][i] == version) {
+                        return true;
                     }
                 }
-                return true;
-            };
+            }
+            return false;
+        }
+
+        function changeSelected(instance, version) {
+            if (vm.isVersionDeleted(instance, vm.selectedVersion[instance])) {
+                for (var i in vm.editorService.versions) {
+                    if (!vm.isVersionDeleted(instance, vm.editorService.versions[i])) {
+                        vm.selectedVersion[instance] = vm.editorService.versions[i];
+                    }
+                }
+            }
+            return true;
+        }
 
 
-            /**
-             * Download and write all version variables
-             */
-            $scope.loadData = function() {
+        /**
+         * Download and write all version variables
+         */
+        function loadData() {
+            vm.values = {};
+            vm.val1 = {};
+            vm.versions = {};
+            vm.liveVersion = {};
 
-                $scope.values = {};
-                $scope.val1 = {};
-
-                $scope.versions = {};
-                $scope.liveVersion = {};
-
-                var _loadVariables = function(instance) {
-                    for (var i in $scope.versions[instance]) {
-                        var version = $scope.versions[instance][i];
-                        var request = {
-                            method: 'GET',
-                            url: API_HOST + '/v1/pkg/' + $stateParams.domain + '/' + instance + '/' + $scope.editorService.service + '/' + version,
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        };
-
-                        $scope.requestsCounter++;
-                        $http(request).then(
-                            function (response) {
-                                $scope.requestsCounter--;
-                                $scope.loaded = true;
-
-                                var splitedUrl = response.config.url.split('/');
-
-                                var version = splitedUrl[splitedUrl.length - 1],
-                                    instance = splitedUrl[splitedUrl.length - 3];
-
-                                $scope.selectedVersion[instance] = version;
-
-                                for (var varName in response.data) {
-                                    if (!$scope.values[varName]) {
-                                        $scope.values[varName] = {};
-                                    }
-
-                                    if (!$scope.values[varName][instance]) {
-                                        $scope.values[varName][instance] = {};
-                                    }
-
-                                    $scope.values[varName][instance][version] = response.data[varName];
-                                }
-                            },
-                            function (response) {
-                                $scope.requestsCounter--;
-
-                                $scope.loaded = true;
-                            }
-                    );
+            vm.editorService.instances.forEach(function (instance) {
+                var loadVersionsRequest = {
+                    method: 'GET',
+                    url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + instance + '/' + vm.editorService.service + '/',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
                 };
+                vm.requestsCounter++;
+                $http(loadVersionsRequest).then(
+                    function(response) {
+                        vm.requestsCounter--;
+                        for (var i in response.data) {
+                            if (!vm.versions[instance]) {
+                                vm.versions[instance] = [];
+                            }
 
-                $scope.editorService.instances.forEach(function (instance) {
-                    var loadVersionsRequest = {
+                            vm.versions[instance].push(i);
+                            if (response[i]) {
+                                vm.liveVersion[instance] = i;
+                                vm.selectedVersion[instance] = i;
+                            }
+                        }
+
+                        _loadVariables(instance);
+                    });
+            });
+
+            function _loadVariables(instance) {
+                for (var i in vm.versions[instance]) {
+                    var version = vm.versions[instance][i];
+                    var request = {
                         method: 'GET',
-                        url: API_HOST + '/v1/pkg/' + $stateParams.domain + '/' + instance + '/' + $scope.editorService.service + '/',
+                        url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + instance + '/' + vm.editorService.service + '/' + version,
                         headers: {
                             'Content-Type': 'application/json'
                         }
                     };
-                    $scope.requestsCounter++;
-                    $http(loadVersionsRequest).then(
-                        function(response) {
-                            $scope.requestsCounter--;
-                            for (var i in response.data) {
-                                if (!$scope.versions[instance]) {
-                                    $scope.versions[instance] = [];
+
+                    vm.requestsCounter++;
+                    $http(request).then(
+                        function (response) {
+                            vm.requestsCounter--;
+                            vm.loaded = true;
+
+                            var splitedUrl = response.config.url.split('/');
+
+                            var version = splitedUrl[splitedUrl.length - 1],
+                                instance = splitedUrl[splitedUrl.length - 3];
+
+                            vm.selectedVersion[instance] = version;
+
+                            for (var varName in response.data) {
+                                if (!vm.values[varName]) {
+                                    vm.values[varName] = {};
                                 }
 
-                                $scope.versions[instance].push(i);
-                                if (response[i]) {
-                                    $scope.liveVersion[instance] = i;
-                                    $scope.selectedVersion[instance] = i;
+                                if (!vm.values[varName][instance]) {
+                                    vm.values[varName][instance] = {};
                                 }
+
+                                vm.values[varName][instance][version] = response.data[varName];
                             }
-
-                            _loadVariables(instance);
                         },
-                        function(response) {
+                        function (response) {
+                            vm.requestsCounter--;
 
+                            vm.loaded = true;
                         }
                     );
-                });
-
-            };
-
-            $scope.loadData();
-        });
-
-        /**
-         * Checks that candidate is exist in instance array of current selected service
-         * @param candidate Value to check
-         * @returns {boolean}
-         */
-        var isInstance = function (candidate) {
-            for (var i in $scope.editorService.instances) {
-                if ($scope.editorService.instances[i] == candidate) {
-                    return true;
                 }
             }
-            return false
-        };
+        }
 
         /**
-         * Change selected version in the table header
-         * @param instance Instance name for version change
-         * @param newVersion version to change
-         */
-        $scope.changeSelectedVersion = function (instance, newVersion) {
-            $scope.selectedVersion[instance] = newVersion;
-        };
+        * Change selected version in the table header
+        * @param instance Instance name for version change
+        * @param newVersion version to change
+        */
+        function changeSelectedVersion(instance, newVersion) {
+           vm.selectedVersion[instance] = newVersion;
+        }
 
         /**
-         * Checks that version in instance has live status
-         * @param instance
-         * @param version
-         * @returns {boolean}
-         */
-        $scope.isLive = function (instance, version) {
-            return $scope.liveVersion[instance] == version;
-        };
+        * Checks that version in instance has live status
+        */
+        function isLive(instance, version) {
+           return vm.liveVersion[instance] == version;
+        }
 
-        $scope.makeLive = function(instance, version) {
+        function makeLive(instance, version) {
             $('span[instance='+instance+'].set-live-button').addClass('loading').text('Loading...');
 
             var postRequest = {
                 method: 'POST',
-                url: API_HOST + '/v1/pkg/' + $stateParams.domain + '/' + instance + '/' + $scope.editorService.service + '/' + version + '/live',
+                url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + instance + '/' + vm.editorService.service + '/' + version + '/live',
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -226,39 +191,23 @@
                 function(response) {
                     Notification.success('Live version for ' + instance + ' has been changed.');
                     $('span[instance='+instance+'].set-live-button').removeClass('loading').text('Set live');
-                    $scope.editorService.live[instance] = version;
+                    vm.editorService.live[instance] = version;
                 },
                 function(response) {
                     $('span[instance='+instance+'].set-live-button').removeClass('loading').text('Set live');
                 }
             );
-        };
-
-        var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-        function isEmpty(obj) {
-
-            if (obj == null) return true;
-
-            if (obj.length > 0)    return false;
-            if (obj.length === 0)  return true;
-
-            for (var key in obj) {
-                if (hasOwnProperty.call(obj, key)) return false;
-            }
-
-            return true;
         }
 
         /**
          * Checks that we have something to save (using for displaying save button)
          * @returns {boolean}
          */
-        $scope.isSavable = function () {
-            return !isEmpty($scope.itemsForSave) || !isEmpty($scope.itemsForDelete);
-        };
+        function isSavable() {
+            return !isEmpty(vm.itemsForSave) || !isEmpty(vm.itemsForDelete);
+        }
 
-        $scope.makeCopy = function(instance, version) {
+        function makeCopy(instance, version) {
             var modalInstance = $modal.open({
                 animation: true,
                 templateUrl: 'newVersionModal.html',
@@ -313,7 +262,7 @@
 
                 var postRequest = {
                     method: 'POST',
-                    url: API_HOST + '/v1/pkg/' + $stateParams.domain + '/' + targetInstance + '/' + $scope.editorService.service + '/' + newVersionName,
+                    url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + targetInstance + '/' + $scope.editorService.service + '/' + newVersionName,
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -344,14 +293,14 @@
                     }
                 );
             };
-        };
+        }
 
         /**
          * Listener for save button
          */
-        $scope.save = function () {
+        function save() {
             $('#env-save-button').button('loading');
-            for (var instance in $scope.itemsForSave) {
+            for (var instance in vm.itemsForSave) {
                 var versions = $scope.itemsForSave[instance];
                 for (var version in versions) {
                     var data = $scope.itemsForSave[instance][version];
@@ -377,8 +326,8 @@
                 }
             }
 
-            $scope.itemsForSave = {};
-        };
+            vm.itemsForSave = {};
+        }
 
 
         /**
@@ -388,19 +337,56 @@
          * @param instance
          * @param version
          */
-        $scope.updateValues = function (name, newValue, instance, version) {
-            if (!$scope.itemsForSave[instance]) {
-                $scope.itemsForSave[instance] = [];
+        function updateValues(name, newValue, instance, version) {
+            if (!vm.itemsForSave[instance]) {
+                vm.itemsForSave[instance] = [];
             }
 
-            if (!$scope.itemsForSave[instance][version]) {
-                $scope.itemsForSave[instance][version] = {};
+            if (!vm.itemsForSave[instance][version]) {
+                vm.itemsForSave[instance][version] = {};
             }
 
-            $scope.itemsForSave[instance][version][name] = newValue;
+            vm.itemsForSave[instance][version][name] = newValue;
+        }
+
+        /**
+        * Checks that candidate is exist in instance array of current selected service
+        * @param candidate Value to check
+        * @returns {boolean}
+        */
+        function isInstance(candidate) {
+           for (var i in vm.editorService.instances) {
+               if (vm.editorService.instances[i] == candidate) {
+                   return true;
+               }
+           }
+           return false
+        }
+
+        var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+        function isEmpty(obj) {
+
+           if (obj == null) return true;
+
+           if (obj.length > 0)    return false;
+           if (obj.length === 0)  return true;
+
+           for (var key in obj) {
+               if (hasOwnProperty.call(obj, key)) return false;
+           }
+
+           return true;
+        }
+
+        Object.filter = function( obj, predicate) {
+           var key;
+
+           for (key in obj) {
+               if (obj.hasOwnProperty(key) && predicate(key)) {
+                   return obj[key];
+               }
+           }
         };
     }
-
-    angular.module('qorDash.configurations.services.state.packages.editor')
-        .controller('PackagesEditorController', packagesEditorController);
 })();

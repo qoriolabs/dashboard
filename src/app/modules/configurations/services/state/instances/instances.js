@@ -6,12 +6,12 @@
         .controller('InstancesController', instancesController);
 
     function instancesController($scope, $state, resolvedEnv) {
-        $scope.saveAvailableHelper = 0;
+        $scope.showButtonAvailableHelper = 0;
         $scope.checked = {};
         $scope.service = resolvedEnv[$state.params.service];
         $scope.instances = $scope.service.instances;
         $scope.instances.forEach(function(instance) {
-            $scope.saveAvailableHelper++;
+            $scope.showButtonAvailableHelper++;
             $scope.checked[instance] = true;
         });
 
@@ -22,16 +22,16 @@
             $state.params.instances.split(',').forEach(function(instance){
                 if ($scope.checked[instance] != 'undefined') {
                     $scope.checked[instance] = true;
-                    $scope.saveAvailableHelper++;
+                    $scope.showButtonAvailableHelper++;
                 }
             });
         }
 
         $scope.changeState = function(val) {
             if (val) {
-                $scope.saveAvailableHelper++;
+                $scope.showButtonAvailableHelper++;
             } else {
-                $scope.saveAvailableHelper--;
+                $scope.showButtonAvailableHelper--;
             }
         };
 
