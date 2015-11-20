@@ -13,7 +13,7 @@
         });
 
 
-   function packagesEditorController($scope, $state, API_HOST, $http, Notification, $modal, resolvedDomains, resolvedPackage) {
+   function packagesEditorController($state, API_HOST, $http, Notification, $modal, resolvedDomains, resolvedPackage) {
         var vm = this;
 
         vm.selectedVersion = {};
@@ -211,23 +211,25 @@
             var modalInstance = $modal.open({
                 animation: true,
                 templateUrl: 'newVersionModal.html',
-                controller: function($scope, $modalInstance, version, instance, instances) {
-                    $scope.newVersionName = '';
+                controller: function($modalInstance, version, instance, instances) {
+                    var vm = this;
 
-                    $scope.version = version;
-                    $scope.instance = instance;
-                    $scope.instances = instances;
+                    vm.newVersionName = '';
 
-                    $scope.targetInstance = '';
+                    vm.version = version;
+                    vm.instance = instance;
+                    vm.instances = instances;
 
-                    $scope.ok = function () {
-                        if (!$scope.newVersionName || !$scope.targetInstance) {
+                    vm.targetInstance = '';
+
+                    vm.ok = function () {
+                        if (!vm.newVersionName || !vm.targetInstance) {
                             return;
                         }
-                        save($scope.newVersionName, $scope.targetInstance, $modalInstance);
+                        save(vm.newVersionName, vm.targetInstance, $modalInstance);
                     };
 
-                    $scope.cancel = function () {
+                    vm.cancel = function () {
                         $modalInstance.dismiss('cancel');
                     };
                 },
@@ -239,7 +241,7 @@
                         return instance;
                     },
                     instances: function() {
-                        return $scope.service.instances;
+                        return vm.service.instances;
                     }
                 }
             });
@@ -251,18 +253,18 @@
 
                 var data = {};
 
-                for (var i in $scope.values) {
-                    if (!$scope.values[i][instance] || !$scope.values[i][instance][version]) {
+                for (var i in vm.values) {
+                    if (!vm.values[i][instance] || !vm.values[i][instance][version]) {
                         continue;
                     }
-                    data[i] = $scope.values[i][instance][version];
+                    data[i] = vm.values[i][instance][version];
                 }
 
                 $('#config-modal-ok-button').button('loading');
 
                 var postRequest = {
                     method: 'POST',
-                    url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + targetInstance + '/' + $scope.editorService.service + '/' + newVersionName,
+                    url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + targetInstance + '/' + vm.editorService.service + '/' + newVersionName,
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -271,18 +273,18 @@
 
                 $http(postRequest).then(
                     function(response) {
-                        $scope.editorService.versions.push(newVersionName);
-                        for (var i in $scope.deletedVersions) {
+                        vm.editorService.versions.push(newVersionName);
+                        for (var i in vm.deletedVersions) {
                             if (i != targetInstance) {
-                                $scope.deletedVersions[i].push(newVersionName);
+                                vm.deletedVersions[i].push(newVersionName);
                             }
                         }
 
                         for (i in data) {
-                            $scope.values[i][targetInstance][newVersionName] = $scope.values[i][instance][version];
+                            vm.values[i][targetInstance][newVersionName] = vm.values[i][instance][version];
                         }
 
-                        $scope.changeSelectedVersion(targetInstance, newVersionName);
+                        vm.changeSelectedVersion(targetInstance, newVersionName);
 
                         Notification.success('Copy created');
 
@@ -301,12 +303,12 @@
         function save() {
             $('#env-save-button').button('loading');
             for (var instance in vm.itemsForSave) {
-                var versions = $scope.itemsForSave[instance];
+                var versions = vm.itemsForSave[instance];
                 for (var version in versions) {
-                    var data = $scope.itemsForSave[instance][version];
+                    var data = vm.itemsForSave[instance][version];
                     var request = {
                         method: 'PUT',
-                        url: API_HOST + '/v1/pkg/' + $scope.domain.id + '/' + instance + '/' + $scope.editorService.service + '/' + version,
+                        url: API_HOST + '/v1/pkg/' + vm.domain.id + '/' + instance + '/' + vm.editorService.service + '/' + version,
                         headers: {
                             'Content-Type': 'application/json'
                         },
