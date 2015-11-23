@@ -10,25 +10,22 @@ describe('Service: configurationService', function() {
         version = 'version',
         newVersionName = 'newVersion',
         fileVersion = 'fileVersion',
-        errorHandler = errorHandler,
-        API_HOST;
+        API_HOST = 'API_HOST';
 
-    beforeEach(function() {
-        module('ui.router');
-        module('ui-notification');
-        module('qorDash.config');
-        module('qorDash.core');
-        module("qorDash.loaders");
+    beforeEach(function(){
+        module("qorDash.api");
+        module(function($provide) {
+            $provide.constant("API_HOST", API_HOST);
+            $provide.service('errorHandler', function(){
+                this.showError = jasmine.createSpy('showError');
+            });
+        });
     });
 
     beforeEach(function() {
-        inject(function (_configurationService_, $httpBackend, _user_, _API_HOST_, _errorHandler_, $state) {
+        inject(function (_configurationService_, $httpBackend) {
             configurationService = _configurationService_;
             httpBackend = $httpBackend;
-            errorHandler = _errorHandler_;
-            API_HOST = _API_HOST_;
-
-            spyOn($state, 'go').and.returnValue(true);
         });
     });
 

@@ -1,7 +1,7 @@
 (function () {
 
     angular
-        .module('qorDash.loaders')
+        .module('qorDash.api')
         .factory('configurationService', configurationService);
 
     function configurationService ($http, API_HOST, errorHandler) {
@@ -57,9 +57,6 @@
             var request = {
                 method: 'POST',
                 url: API_HOST + '/v1/conf/' + domain + '/' + service + '/' + fileName,
-                headers: {
-                    'Content-Type': 'text/plain'
-                },
                 data: text
             };
 
@@ -71,10 +68,7 @@
         function getFileContent(domain, instance, service, version, fileName) {
             var request = {
                 method: 'GET',
-                url: API_HOST + '/v1/conf/' + domain + '/' + instance + '/' + service + '/' + version + '/' + fileName,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                url: API_HOST + '/v1/conf/' + domain + '/' + instance + '/' + service + '/' + version + '/' + fileName
             };
 
             return $http(request)
@@ -86,10 +80,7 @@
             var versionsRequest = {
                 method: 'GET',
                 url: API_HOST + '/v1/conf/' + domain + '/' + instance + '/' +
-                    service + '/' + fileName + '/',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                    service + '/' + fileName + '/'
             };
             return $http(versionsRequest)
                 .then(httpRequestSuccess)
@@ -100,10 +91,7 @@
             var request = {
                 method: 'GET',
                 url: API_HOST + '/v1/conf/' + domain +
-                    '/' + service + '/' + fileName,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                    '/' + service + '/' + fileName
             };
             return $http(request)
                 .then(httpRequestSuccess)
@@ -173,10 +161,7 @@
         function makeVersionLive(domain, instance, service, version, fileName) {
             var postRequest = {
                 method: 'POST',
-                url: API_HOST + '/v1/conf/' + domain + '/' + instance + '/' + service + '/' + version + '/' + fileName +  '/live',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                url: API_HOST + '/v1/conf/' + domain + '/' + instance + '/' + service + '/' + version + '/' + fileName +  '/live'
             };
             return $http(postRequest)
                 .then(httpRequestSuccess)

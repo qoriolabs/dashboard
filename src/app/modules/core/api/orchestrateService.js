@@ -1,7 +1,7 @@
 (function () {
 
     angular
-        .module('qorDash.loaders')
+        .module('qorDash.api')
         .factory('orchestrateService', orchestrateService);
 
     function orchestrateService ($http, API_HOST) {
@@ -45,9 +45,6 @@
             var request = {
                 method: 'POST',
                 url: API_HOST + activateUrl,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 data: data
             };
 

@@ -7,23 +7,20 @@ describe('Service: orchestrateService', function() {
         optionId = 'optionId',
         serverResponse = 'response',
         activateUrl = 'activateUrl',
-        data = 'data';
+        data = 'data',
+        API_HOST = 'API_HOST';
 
-    beforeEach(function() {
-        module('ui.router');
-        module('qorDash.config');
-        module('qorDash.core');
-        module("qorDash.loaders");
+    beforeEach(function(){
+        module("qorDash.api");
+        module(function($provide) {
+            $provide.constant("API_HOST", API_HOST);
+        });
     });
 
-
     beforeEach(function() {
-        inject(function (_orchestrateService_, $httpBackend, _API_HOST_, _user_, $state) {
+        inject(function (_orchestrateService_, $httpBackend) {
             orchestrateService = _orchestrateService_;
             httpBackend = $httpBackend;
-            API_HOST = _API_HOST_;
-
-            spyOn($state, 'go').and.returnValue(true);
         });
     });
 

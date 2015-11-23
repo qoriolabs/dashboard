@@ -1,19 +1,14 @@
 describe('Controller: OrchestrateHistoryController', function() {
 
-    var $scope;
-    var $stateParams,
+    var $scope,
+        $stateParams,
         previousCalls = {1: 2},
-        error = 'error',
         resolvedHistory = {1: 2};
 
-    beforeEach(function(){
-        module('ui.router');
-        module('qorDash.config');
-        module('qorDash.core');
-        module('qorDash.loaders');
-        module('qorDash.orchestrate');
-    });
 
+    beforeEach(function(){
+        module('qorDash.orchestrate.domain.instance.history');
+    });
 
     beforeEach(function () {
         inject(function(_$rootScope_, _$controller_)  {
