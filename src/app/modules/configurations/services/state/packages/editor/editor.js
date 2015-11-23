@@ -3,14 +3,7 @@
 
     angular
         .module('qorDash.configurations.services.state.packages.editor')
-        .controller('PackagesEditorController', packagesEditorController)
-        .config(function(NotificationProvider) {
-            NotificationProvider.setOptions({
-                delay: 5000,
-                positionX: 'right',
-                positionY: 'bottom'
-            });
-        });
+        .controller('PackagesEditorController', packagesEditorController);
 
 
    function packagesEditorController($state, API_HOST, $http, Notification, $modal, resolvedDomains, resolvedPackage) {

@@ -7,33 +7,22 @@ describe('Controller: ConfigurationsController', function() {
         domain = {};
 
     beforeEach(function(){
-        module('ui.router');
-        module('qorDash.config');
-        module('qorDash.core');
-        module('qorDash.auth');
         module('qorDash.configurations');
+        module(function($provide) {
+            $provide.service('$state', function() {
+                this.go = jasmine.createSpy('go').and.callThrough();
+                this.current = {
+                    name: 'app.configurations'
+                };
+            });
+        });
     });
-
-
-
-    beforeEach(function() {
-        $state = {
-            go: function(path) {
-                return path;
-            },
-            current: {
-                name: 'app.configurations'
-            }
-        };
-    });
-
 
 
     beforeEach(function () {
         inject(function(_$rootScope_, _$controller_, _$state_)  {
             $scope = _$rootScope_.$new();
-            spyOn(_$state_, 'go').and.returnValue(true);
-            spyOn($state,'go').and.callThrough();
+            $state = _$state_;
             _$controller_('ConfigurationsController as vm', {$scope: $scope, $state: $state, $stateParams: $stateParams, resolvedDomains: resolvedDomains});
         })
     });
