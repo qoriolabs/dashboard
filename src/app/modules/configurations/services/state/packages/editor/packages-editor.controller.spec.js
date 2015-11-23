@@ -63,4 +63,15 @@ describe('Controller: PackagesEditorController', function() {
         });
     });
 
+    describe('isVersionDeleted()', function() {
+        it('should check is version deleted', function() {
+            $scope.vm.deletedVersions = {
+                'instance': ['one']
+            };
+            expect($scope.vm.isVersionDeleted('instance', 'one')).toBe(true);
+            expect($scope.vm.isVersionDeleted('instance', 'two')).toBe(false);
+            expect($scope.vm.isVersionDeleted('instance1', 'two')).toBe(false);
+        });
+    })
+
 });

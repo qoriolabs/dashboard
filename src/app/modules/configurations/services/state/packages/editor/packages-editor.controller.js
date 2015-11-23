@@ -54,8 +54,8 @@
                         return true;
                     }
                 }
+                return false;
             }
-            return false;
         }
 
         function changeSelected(instance, version) {
@@ -68,7 +68,6 @@
             }
             return true;
         }
-
 
         /**
          * Download and write all version variables
@@ -88,9 +87,8 @@
                             if (!vm.versions[instance]) {
                                 vm.versions[instance] = [];
                             }
-
                             vm.versions[instance].push(i);
-                            if (response[i]) {
+                            if (response[i] || i == Object.keys(response)[Object.keys(response).length - 1]) {
                                 vm.liveVersion[instance] = i;
                                 vm.selectedVersion[instance] = i;
                             }
@@ -103,13 +101,6 @@
             function _loadVariables(instance) {
                 for (var i in vm.versions[instance]) {
                     var version = vm.versions[instance][i];
-                    var request = {
-                        method: 'GET',
-                        url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + instance + '/' + vm.editorService.service + '/' + version,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    };
 
                     vm.requestsCounter++;
                     configurationService.pkg.getVariables($state.params.domain, instance, vm.editorService.service, version).then(
