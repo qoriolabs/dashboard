@@ -9,31 +9,22 @@ describe('Controller: PackagesController', function() {
         };
 
     beforeEach(function(){
-        module('ui.router');
-        module('qorDash.config');
-        module('qorDash.core');
-        module('qorDash.auth');
         module('qorDash.configurations.services.state.packages');
+        module(function($provide) {
+            $provide.service('$state', function() {
+                this.go = jasmine.createSpy('go').and.callThrough();
+                this.params = {
+                    service: 'service',
+                    instances: 'one,two'
+                };
+            })
+        });
     });
-
-    beforeEach(function() {
-        $state = {
-            go: function(path) {
-                return path;
-            },
-            params: {
-                service: 'service',
-                instances: 'one,two'
-            }
-        };
-    });
-
 
     beforeEach(function () {
         inject(function(_$rootScope_, _$state_, _$controller_)  {
             $scope = _$rootScope_.$new();
-            spyOn(_$state_, 'go').and.returnValue(true);
-            spyOn($state,'go').and.callThrough();
+            $state = _$state_;
             _$controller_('PackagesController as vm', {$scope: $scope, $state: $state, resolvedPackage: resolvedPackage});
 
         })

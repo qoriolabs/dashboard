@@ -155,4 +155,62 @@ describe('Service: configurationService', function() {
 
         httpBackend.flush();
     });
+
+    it("should get pkg versions", function(done) {
+        httpBackend.expect('GET', API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/').respond(serverResponse);
+
+        configurationService.pkg.getVersions(domain, instance, service).then(function(response) {
+            expect(response).toEqual(serverResponse);
+            done();
+        });
+
+        httpBackend.flush();
+    });
+
+    it("should get pkg variables", function(done) {
+        httpBackend.expect('GET', API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/' + version).respond(serverResponse);
+
+        configurationService.pkg.getVariables(domain, instance, service, version).then(function(response) {
+            expect(response.data).toEqual(serverResponse);
+            done();
+        });
+
+        httpBackend.flush();
+    });
+
+    it("should make pkg version live", function(done) {
+        httpBackend.expect('POST', API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/'
+            + version  +  '/live').respond(serverResponse);
+
+        configurationService.pkg.makeLive(domain, instance, service, version).then(function(response) {
+            expect(response).toEqual(serverResponse);
+            done();
+        });
+
+        httpBackend.flush();
+    });
+
+    it("should save pkg copy", function(done) {
+        httpBackend.expect('POST', API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/'
+            + version, data).respond(serverResponse);
+
+        configurationService.pkg.saveCopy(domain, instance, service, version, data).then(function(response) {
+            expect(response).toEqual(serverResponse);
+            done();
+        });
+
+        httpBackend.flush();
+    });
+
+    it("should save pkg copy", function(done) {
+        httpBackend.expect('PUT', API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/'
+            + version, data).respond(serverResponse);
+
+        configurationService.pkg.save(domain, instance, service, version, data).then(function(response) {
+            expect(response).toEqual(serverResponse);
+            done();
+        });
+
+        httpBackend.flush();
+    });
 });

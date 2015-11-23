@@ -20,6 +20,13 @@
                 cloneFile : cloneFile,
                 deleteFile : deleteFile,
                 makeVersionLive : makeVersionLive
+            },
+            pkg: {
+                getVersions: pkgGetVersions,
+                getVariables: pkgGetVariables,
+                makeLive: pkgMakeLive,
+                saveCopy: pkgSaveCopy,
+                save: pkgSave
             }
         };
 
@@ -164,6 +171,56 @@
                 url: API_HOST + '/v1/conf/' + domain + '/' + instance + '/' + service + '/' + version + '/' + fileName +  '/live'
             };
             return $http(postRequest)
+                .then(httpRequestSuccess)
+                .catch(httpRequestFailed);
+        }
+
+        function pkgGetVersions(domain, instance, service) {
+            var loadVersionsRequest = {
+                method: 'GET',
+                url: API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/'
+            };
+            return $http(loadVersionsRequest)
+                .then(httpRequestSuccess)
+                .catch(httpRequestFailed);
+        }
+
+        function pkgGetVariables(domain, instance, service, version) {
+            var request = {
+                method: 'GET',
+                url: API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/' + version
+            };
+            return $http(request);
+        }
+
+        function pkgMakeLive(domain, instance, service, version) {
+            var postRequest = {
+                method: 'POST',
+                url: API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/' + version + '/live'
+            };
+            return $http(postRequest)
+                .then(httpRequestSuccess)
+                .catch(httpRequestFailed);
+        }
+
+        function pkgSaveCopy(domain, instance, service, version, data) {
+            var postRequest = {
+                method: 'POST',
+                url: API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/' + version,
+                data: data
+            };
+            return $http(postRequest)
+                .then(httpRequestSuccess)
+                .catch(httpRequestFailed);
+        }
+
+        function pkgSave(domain, instance, service, version, data) {
+            var request = {
+                method: 'PUT',
+                url: API_HOST + '/v1/pkg/' + domain + '/' + instance + '/' + service + '/' + version,
+                data: data
+            };
+            return $http(request)
                 .then(httpRequestSuccess)
                 .catch(httpRequestFailed);
         }

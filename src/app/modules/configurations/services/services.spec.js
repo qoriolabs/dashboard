@@ -10,9 +10,7 @@ describe('Controller: ServicesController', function() {
         module('qorDash.configurations.services');
         module(function($provide) {
             $provide.service('$state', function() {
-                this.go = jasmine.createSpy('go').and.callFake(function(smth) {
-                    return smth;
-                });
+                this.go = jasmine.createSpy('go').and.callThrough();
                 this.current = {
                     name: 'app.configurations.services'
                 }

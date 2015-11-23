@@ -8,7 +8,7 @@
         ])
         .config(config);
 
-    function config($stateProvider, NotificationProvider) {
+    function config($stateProvider) {
         $stateProvider
             .state('app.configurations.services.state.packages.editor', {
                 url: '/:instances',

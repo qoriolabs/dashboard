@@ -6,7 +6,7 @@
         .controller('PackagesEditorController', packagesEditorController);
 
 
-   function packagesEditorController($state, API_HOST, $http, Notification, $modal, resolvedDomains, resolvedPackage) {
+   function packagesEditorController($state, configurationService, Notification, $modal, resolvedDomains, resolvedPackage) {
         var vm = this;
 
         vm.selectedVersion = {};
@@ -80,18 +80,11 @@
             vm.liveVersion = {};
 
             vm.editorService.instances.forEach(function (instance) {
-                var loadVersionsRequest = {
-                    method: 'GET',
-                    url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + instance + '/' + vm.editorService.service + '/',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
                 vm.requestsCounter++;
-                $http(loadVersionsRequest).then(
+                configurationService.pkg.getVersions($state.params.domain, instance, vm.editorService.service).then(
                     function(response) {
                         vm.requestsCounter--;
-                        for (var i in response.data) {
+                        for (var i in response) {
                             if (!vm.versions[instance]) {
                                 vm.versions[instance] = [];
                             }
@@ -119,7 +112,7 @@
                     };
 
                     vm.requestsCounter++;
-                    $http(request).then(
+                    configurationService.pkg.getVariables($state.params.domain, instance, vm.editorService.service, version).then(
                         function (response) {
                             vm.requestsCounter--;
                             vm.loaded = true;
@@ -142,13 +135,13 @@
 
                                 vm.values[varName][instance][version] = response.data[varName];
                             }
-                        },
-                        function (response) {
+                        }
+                    )
+                        .catch(function (response) {
                             vm.requestsCounter--;
 
                             vm.loaded = true;
-                        }
-                    );
+                        });
                 }
             }
         }
@@ -170,24 +163,10 @@
         }
 
         function makeLive(instance, version) {
-            $('span[instance='+instance+'].set-live-button').addClass('loading').text('Loading...');
-
-            var postRequest = {
-                method: 'POST',
-                url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + instance + '/' + vm.editorService.service + '/' + version + '/live',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-
-            $http(postRequest).then(
-                function(response) {
+            configurationService.pkg.makeLive($state.params.domain, instance, vm.editorService, version).then(
+                function() {
                     Notification.success('Live version for ' + instance + ' has been changed.');
-                    $('span[instance='+instance+'].set-live-button').removeClass('loading').text('Set live');
                     vm.editorService.live[instance] = version;
-                },
-                function(response) {
-                    $('span[instance='+instance+'].set-live-button').removeClass('loading').text('Set live');
                 }
             );
         }
@@ -253,19 +232,8 @@
                     data[i] = vm.values[i][instance][version];
                 }
 
-                $('#config-modal-ok-button').button('loading');
-
-                var postRequest = {
-                    method: 'POST',
-                    url: API_HOST + '/v1/pkg/' + $state.params.domain + '/' + targetInstance + '/' + vm.editorService.service + '/' + newVersionName,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    data: data
-                };
-
-                $http(postRequest).then(
-                    function(response) {
+                configurationService.pkg.saveCopy($state.params.domain, targetInstance, vm.editorService.service, newVersionName, data).then(
+                    function() {
                         vm.editorService.versions.push(newVersionName);
                         for (var i in vm.deletedVersions) {
                             if (i != targetInstance) {
@@ -282,9 +250,6 @@
                         Notification.success('Copy created');
 
                         $modalInstance.close();
-                    },
-                    function(response) {
-                        $('#config-modal-ok-button').button('reset');
                     }
                 );
             };
@@ -299,25 +264,13 @@
                 var versions = vm.itemsForSave[instance];
                 for (var version in versions) {
                     var data = vm.itemsForSave[instance][version];
-                    var request = {
-                        method: 'PUT',
-                        url: API_HOST + '/v1/pkg/' + vm.domain.id + '/' + instance + '/' + vm.editorService.service + '/' + version,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        data: data
-                    };
-
-                    $http(request).then(
-                        function (response) {
+                    configurationService.pkg.save(vm.domain.id, instance, vm.editorService.service, version, data)
+                        .then(function (response) {
                             Notification.success('Saved successfully');
-                            $('#env-save-button').button('reset');
-                        },
-                        function (responce) {
+                        })
+                        .catch(function (responce) {
                             Notification.error('Saving error: ' + error.error);
-                            $('#env-save-button').button('reset');
-                        }
-                    );
+                        });
                 }
             }
 
