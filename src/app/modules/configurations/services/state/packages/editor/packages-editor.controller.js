@@ -170,6 +170,7 @@
             return !isEmpty(vm.itemsForSave) || !isEmpty(vm.itemsForDelete);
         }
 
+
         function makeCopy(instance, version) {
             var modalInstance = $modal.open({
                 animation: true,
@@ -259,7 +260,7 @@
                         .then(function (response) {
                             Notification.success('Saved successfully');
                         })
-                        .catch(function (responce) {
+                        .catch(function (error) {
                             Notification.error('Saving error: ' + error.error);
                         });
                 }
@@ -278,7 +279,7 @@
          */
         function updateValues(name, newValue, instance, version) {
             if (!vm.itemsForSave[instance]) {
-                vm.itemsForSave[instance] = [];
+                vm.itemsForSave[instance] = {};
             }
 
             if (!vm.itemsForSave[instance][version]) {
