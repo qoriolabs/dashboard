@@ -2,15 +2,11 @@ describe('Controller: PackagesEditorController', function() {
 
     var $scope;
     var $state,
-        deferred2,
-        deferred3,
-        deferred4,
-        deferred5,
-        configurationService,
         $q,
         $modal,
-        error = {},
+        configurationService,
         Notification,
+        error = {},
         resolvedPackage = {
             service: {
                 instances: ['one', 'two', 'three'],
@@ -29,7 +25,11 @@ describe('Controller: PackagesEditorController', function() {
                 'varName': 'name'
             }
         },
-        deferred1;
+        deferred1,
+        deferred2,
+        deferred3,
+        deferred4,
+        deferred5;
 
     beforeEach(function(){
         module('qorDash.configurations.services.state.packages.editor');
@@ -148,22 +148,15 @@ describe('Controller: PackagesEditorController', function() {
             expect($scope.vm.val1).toBeDefined();
             expect($scope.vm.versions).toBeDefined();
             expect($scope.vm.liveVersion).toBeDefined();
-            $scope.vm.editorService.instances.forEach(function (instance){
-                expect($scope.vm.requestsCounter).toBe(3);
-            })
+            expect($scope.vm.requestsCounter).toBe(3);
         });
 
-        describe('', function () {
+        describe('configurationService.pkg.getVersions()', function () {
             beforeEach(function () {
-                $scope.vm.values = {};
-                $scope.vm.val1 = {};
-                $scope.vm.versions = {};
-                $scope.vm.liveVersion = {};
-                $scope.vm.requestsCounter = 0;
                 $scope.vm.editorService.instances = ['instance'];
                 $scope.vm.loadData();
             });
-            it('', function () {
+            it('should call configurationService.pkg.getVersions()', function () {
                 expect(configurationService.pkg.getVersions).toHaveBeenCalledWith($state.params.domain, 'instance', $scope.vm.editorService.service);
             });
 
@@ -199,6 +192,7 @@ describe('Controller: PackagesEditorController', function() {
 
                     describe('after fail loading', function () {
                         beforeEach(function () {
+                            $scope.vm.loaded = false;
                             deferred4.reject({});
                             $scope.$root.$digest();
                         });
