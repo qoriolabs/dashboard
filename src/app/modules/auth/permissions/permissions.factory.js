@@ -6,8 +6,7 @@
         .factory('permissions', permissionsService);
 
     function permissionsService($q, auth, USER_HAS_NO_ACCESS) {
-        // TODO: log_details is unknown state. maybe we should remove it
-        var statesWhiteList = ['login', 'logout', 'log_details'];
+        var statesWhiteList = ['login', 'logout'];
         var _userPermissions = _createPermissionsMap();
 
         function _createPermissionsMap() {
@@ -21,7 +20,7 @@
                 }
             }
             return Object.keys(permissions).length > 0 ? permissions : null;
-        };
+        }
 
         function hasAccess(state, action) {
             if (statesWhiteList.indexOf(state) >= 0){

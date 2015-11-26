@@ -5,7 +5,7 @@
         .module('qorDash.auth')
         .service('user', userService);
 
-    function userService($http, AUTH_API_URL, auth) {
+    function userService($http, AUTH_API_URL, auth, oauthProviderGoogle) {
         return {
             isAuthed: isAuthed,
             logout: logout,
@@ -29,7 +29,11 @@
         }
 
         function logout() {
-            // TODO: Implement oauth logout
+            // TODO: Implement Github oauth logout
+            if (oauthProviderGoogle.isUserSignedIn()) {
+                debugger;
+                oauthProviderGoogle.logout();
+            }
             auth.removeToken();
         }
     }
