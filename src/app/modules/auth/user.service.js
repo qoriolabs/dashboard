@@ -31,7 +31,6 @@
         function logout() {
             // TODO: Implement Github oauth logout
             if (oauthProviderGoogle.isUserSignedIn()) {
-                debugger;
                 oauthProviderGoogle.logout();
             }
             auth.removeToken();
