@@ -9,13 +9,14 @@
 
         var providerData = {
             client_id: GOOGLE_CLIENT_ID,
-            cookie_policy: 'single_host_origin',
+            cookie_policy: 'single_host_origin'
         };
 
         return {
             login: login,
             logout: logout,
-            exchangeToken: exchangeToken
+            exchangeToken: exchangeToken,
+            isUserSignedIn: isUserSignedIn
         };
 
         function googleApi(){
@@ -32,6 +33,13 @@
                 return auth2.signIn({
                     scope: 'openid'
                 });
+            });
+        }
+
+        function isUserSignedIn() {
+            return googleApi().then(function(gapi){
+                var auth2 = gapi.auth2.getAuthInstance();
+                return auth2.isSignedIn.get();
             });
         }
 
