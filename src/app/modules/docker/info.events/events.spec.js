@@ -8,7 +8,8 @@ describe('Controller: DockerInfoEventsController', function() {
         $timeout,
         q,
         deferred,
-        Oboe;
+        Oboe,
+        node = {node: 'node'};
 
     beforeEach(function(){
         module('qorDash.docker.domain.dockers.menu.info.events');
@@ -59,7 +60,7 @@ describe('Controller: DockerInfoEventsController', function() {
             })
         });
 
-        describe('after error calling', function () {
+        describe('after fail calling', function () {
             beforeEach(function () {
                 deferred.reject({data: 'error'});
                 $scope.$root.$digest();
@@ -70,13 +71,14 @@ describe('Controller: DockerInfoEventsController', function() {
             })
         });
 
-        describe('', function () {
+        describe('after receiving node', function () {
             beforeEach(function () {
-
+                deferred.notify(node);
+                $scope.$root.$digest();
             });
 
             it('should push node to $scope.vm.dockerEvents', function () {
-
+                expect($scope.vm.dockerEvents).toEqual([node]);
             });
         });
 
