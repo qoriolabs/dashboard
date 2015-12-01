@@ -5,7 +5,7 @@ beforeEach(function(){
 
             };
             this.state = function() {
-
+                return this;
             };
             this.decorator = function() {
 
